@@ -19,7 +19,7 @@ for n in (6, 7, 8):
 		measure = {}
 		for p in range(1, 13):
 			measure[p] = [
-				subprocess.check_output(["mpiexec","-machinefile", "./allnodes", "-np", str(p), "./pi.py", str(n), mode])[:-1] for _ in range(5)
+				subprocess.check_output(["mpiexec", "-np", str(p), "./pi.py", str(n), mode])[:-1] for _ in range(5)
 			]
 			print measure[p]
 
