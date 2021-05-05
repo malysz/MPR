@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <sys/time.h>
 
-#define CHUNK_SIZE 100
+#define CHUNK_SIZE 500
 
 int main(int argc, char **argv) {
 	if(argc != 4) {
@@ -31,75 +31,71 @@ int main(int argc, char **argv) {
 		array = malloc(sizeof(double)*n);
 		omp_set_num_threads(threads);
 
-		struct timeval start, end;
-                long secs_used, micros;
+		double start, end;
 
 		if(schedule == 1) {
 			int i;
 
-			gettimeofday(&start, NULL);
-
-			#pragma omp parallel for schedule(static, 1) private(i)
+			start = omp_get_wtime();
+			
+			#pragma omp parallel for default(shared) private(i) schedule(static, 1)
 			for(i = 0; i < n; i++) {
 				array[i] = (rand()+0.0) / INT_MAX;
 			}
 
-			gettimeofday(&end, NULL);
+			end = omp_get_wtime();
 		}
 		if(schedule == 2) {
 			int i;
 
-                        gettimeofday(&start, NULL);
+                        start = omp_get_wtime();
 
-                        #pragma omp parallel for schedule(static, CHUNK_SIZE) private(i)
+                        #pragma omp parallel for default(shared) private(i) schedule(static, CHUNK_SIZE)
                         for(i = 0; i < n; i++) {
                                 array[i] = (rand()+0.0) / INT_MAX;
                         }
 
-                        gettimeofday(&end, NULL);
+                        end = omp_get_wtime();
                 }
 		if(schedule == 3) {
 			int i;
 
-                        gettimeofday(&start, NULL);
+                        start = omp_get_wtime();
 
                         #pragma omp parallel for schedule(dynamic, 1) private(i)
                         for(i = 0; i < n; i++) {
                                 array[i] = (rand()+0.0) / INT_MAX;
                         }
 
-                        gettimeofday(&end, NULL);
+                        end = omp_get_wtime();
                 }
 		if(schedule == 4) {
 			int i;
 
-                        gettimeofday(&start, NULL);
+                        start = omp_get_wtime();
 
-                        #pragma omp parallel for schedule(dynamic, CHUNK_SIZE) private(i)
+                        #pragma omp parallel for default(shared) private(i) schedule(dynamic, CHUNK_SIZE)
                         for(i = 0; i < n; i++) {
                                 array[i] = (rand()+0.0) / INT_MAX;
                         }
 
-                        gettimeofday(&end, NULL);
+                        end = omp_get_wtime();
                 }
 		if(schedule == 5) {
 			int i;
 
-                        gettimeofday(&start, NULL);
+                        start = omp_get_wtime();
 
-                        #pragma omp parallel for schedule(guided) private(i)
+                        #pragma omp parallel for default(shared) private(i) schedule(guided)
                         for(i = 0; i < n; i++) {
                                 array[i] = (rand()+0.0) / INT_MAX;
                         }
 
-                        gettimeofday(&end, NULL);
+                        end = omp_get_wtime();
                 }
 
-		secs_used = (end.tv_sec - start.tv_sec); // avoid overflow by subtracking first
-		micros = end.tv_usec - start.tv_usec;
-		double time = secs_used + 0.0;
-		time += ((micros + 0.0) / 1000000);
-
+		double time = end - start;
+		
 		if(threads == 1) {
 			seq_time = time;
 		}
